@@ -1,0 +1,22 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+rope = "*"
+black = "*"
+bandit = "*"
+flake8 = "*"
+pylint = "*"
+
+[packages]
+requests = "*"
+colorama = "*"
+pyinquirer = "*"
+
+[requires]
+python_version = "3.8"
+
+[pipenv]
+allow_prereleases = true

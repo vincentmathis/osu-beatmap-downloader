@@ -1,12 +1,13 @@
+import argparse
+import json
 import os
 import re
 import sys
 import time
-import json
 
 import requests
-from PyInquirer import prompt
 from loguru import logger
+from PyInquirer import prompt
 
 FORMAT_TIME = "<cyan>{time:YYYY-MM-DD HH:mm:ss}</cyan>"
 FORMAT_LEVEL = "<level>{level: <8}</level>"
@@ -28,8 +29,12 @@ logger.configure(**LOGGER_CONFIG)
 OSU_SESSION_URL = "https://osu.ppy.sh/session"
 OSU_SEARCH_URL = "https://osu.ppy.sh/beatmapsets/search"
 
-OSU_BASE_PATH = os.getenv("LOCALAPPDATA") + "\\osu!\\Songs"
+OSU_BASE_PATH = os.path.join(os.getenv("LOCALAPPDATA"), "osu!", "Songs")
 ILLEGAL_CHARS = re.compile(r"[\<\>:\"\/\\\|\?*]")
+
+HOME_DIR = os.getenv("USERPROFILE")
+CREDS_FILENAME = ".osu-beatmap-downloader-creds.json"
+CREDS_FILEPATH = os.path.join(HOME_DIR, CREDS_FILENAME)
 
 
 class CredentialHelper:
@@ -62,18 +67,18 @@ class CredentialHelper:
 
     def load_credentials(self):
         try:
-            with open("credentials.json", "r") as cred_file:
+            with open(CREDS_FILEPATH, "r") as cred_file:
                 self.credentials = json.load(cred_file)
         except FileNotFoundError:
-            logger.info("File credentials.json not found")
+            logger.info(f"File {CREDS_FILEPATH} not found")
             self.ask_credentials()
 
     def save_credentials(self):
         try:
-            with open("credentials.json", "w") as cred_file:
+            with open(CREDS_FILEPATH, "w") as cred_file:
                 json.dump(self.credentials, cred_file, indent=2)
         except IOError:
-            logger.error("Error writing credentials.json")
+            logger.error(f"Error writing {CREDS_FILEPATH}")
 
 
 class BeatmapSet:
@@ -89,8 +94,9 @@ class BeatmapSet:
 
 
 class Downloader:
-    def __init__(self):
+    def __init__(self, limit):
         self.beatmapsets = set()
+        self.limit = limit
         self.cred_helper = CredentialHelper()
         self.cred_helper.load_credentials()
         self.session = requests.Session()
@@ -105,11 +111,11 @@ class Downloader:
             sys.exit(1)
         logger.success("Login succesfull")
 
-    def scrape_beatmapsets(self, limit=500):
+    def scrape_beatmapsets(self):
         fav_count = sys.maxsize
         num_beatmapsets = 0
         logger.info("Scraping beatmapsets")
-        while num_beatmapsets < limit:
+        while num_beatmapsets < self.limit:
             params = {
                 "sort": "favourites_desc",
                 "cursor[favourite_count]": fav_count,
@@ -159,19 +165,39 @@ class Downloader:
             next_set = self.beatmapsets.pop()
             download_success = self.download_beatmapset_file(next_set)
             if download_success:
+                tries = 0
                 time.sleep(2)
             else:
                 self.beatmapsets.add(next_set)
                 tries += 1
                 if tries > 4:
-                    logger.error("Failed 5 times (server request limit reached?)")
+                    logger.error("Failed 5 times in a row")
+                    logger.info("Website download limit reached")
                     logger.info("Try again later")
                     sys.exit()
 
 
 def main():
-    loader = Downloader()
-    loader.run()
+    parser = argparse.ArgumentParser("osu-beatmap-downloader")
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument(
+        "-l",
+        "--limit",
+        type=int,
+        help="Maximum number of beatmapsets to download",
+        default=200,
+    )
+    group.add_argument("--delete-creds", action="store_true")
+    args = parser.parse_args()
+    if args.delete_creds:
+        try:
+            os.remove(CREDS_FILEPATH)
+            print("Credential file successfully deleted")
+        except FileNotFoundError:
+            print("There is no credential file to delete")
+    else:
+        loader = Downloader(args.limit)
+        loader.run()
 
 
 if __name__ == "__main__":

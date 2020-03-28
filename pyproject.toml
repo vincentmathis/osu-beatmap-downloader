@@ -1,0 +1,35 @@
+[tool.poetry]
+name = "osu-beatmap-downloader"
+version = "0.1.0"
+description = "Downloads x most favorized beatmapsets into your osu! song directory"
+authors = ["Vincent Mathis <vincemathis94@gmail.com>"]
+license = "GPL-3.0"
+readme = "README.md"
+repository = "https://github.com/vincentmathis/osu-beatmap-downloader"
+keywords = ["osu!",
+			"osu",
+            "beatmaps",
+            "downloader"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+requests = "^2.23.0"
+PyInquirer = "^1.0.3"
+loguru = "^0.4.1"
+
+[tool.poetry.dev-dependencies]
+black = "^19.10b0"
+bandit = "^1.6.2"
+flake8 = "^3.7.9"
+pylint = "^2.4.4"
+rope = "^0.16.0"
+
+[tool.poetry.scripts]
+osu-beatmap-downloader = "osu_beatmap_downloader:main"
+
+[tool.poetry.urls]
+issues = "https://github.com/vincentmathis/osu-beatmap-downloader/issues"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"

@@ -9,6 +9,12 @@ import requests
 from loguru import logger
 from PyInquirer import prompt
 
+HOME_DIR = os.path.join(os.getenv("USERPROFILE"), ".osu-beatmap-downloader")
+CREDS_FILEPATH = os.path.join(HOME_DIR, "credentials.json")
+LOGS_FILEPATH = os.path.join(HOME_DIR, "downloader.log")
+OSU_BASE_PATH = os.path.join(os.getenv("LOCALAPPDATA"), "osu!", "Songs")
+ILLEGAL_CHARS = re.compile(r"[\<\>:\"\/\\\|\?*]")
+
 FORMAT_TIME = "<cyan>{time:YYYY-MM-DD HH:mm:ss}</cyan>"
 FORMAT_LEVEL = "<level>{level: <8}</level>"
 FORMAT_MESSAGE = "<level>{message}</level>"
@@ -19,7 +25,7 @@ LOGGER_CONFIG = {
             "format": " | ".join((FORMAT_TIME, FORMAT_LEVEL, FORMAT_MESSAGE)),
         },
         {
-            "sink": "downloader.log",
+            "sink": LOGS_FILEPATH,
             "format": " | ".join((FORMAT_TIME, FORMAT_LEVEL, FORMAT_MESSAGE)),
         },
     ]
@@ -28,13 +34,6 @@ logger.configure(**LOGGER_CONFIG)
 
 OSU_SESSION_URL = "https://osu.ppy.sh/session"
 OSU_SEARCH_URL = "https://osu.ppy.sh/beatmapsets/search"
-
-OSU_BASE_PATH = os.path.join(os.getenv("LOCALAPPDATA"), "osu!", "Songs")
-ILLEGAL_CHARS = re.compile(r"[\<\>:\"\/\\\|\?*]")
-
-HOME_DIR = os.getenv("USERPROFILE")
-CREDS_FILENAME = ".osu-beatmap-downloader-creds.json"
-CREDS_FILEPATH = os.path.join(HOME_DIR, CREDS_FILENAME)
 
 
 class CredentialHelper:
@@ -105,6 +104,7 @@ class Downloader:
         self.remove_existing_beatmapsets()
 
     def login(self):
+        logger.info(" DOWNLOADER STARTED ".center(50, "#"))
         res = self.session.post(OSU_SESSION_URL, data=self.cred_helper.credentials)
         if res.status_code != requests.codes.ok:
             logger.error("Login failed")
@@ -174,7 +174,9 @@ class Downloader:
                     logger.error("Failed 5 times in a row")
                     logger.info("Website download limit reached")
                     logger.info("Try again later")
+                    logger.info(" DOWNLOADER TERMINATED ".center(50, "#") + "\n")
                     sys.exit()
+        logger.info(" DOWNLOADER FINISHED ".center(50, "#") + "\n")
 
 
 def main():

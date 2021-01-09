@@ -32,6 +32,7 @@ LOGGER_CONFIG = {
 }
 logger.configure(**LOGGER_CONFIG)
 
+OSU_URL = "https://osu.ppy.sh/home"
 OSU_SESSION_URL = "https://osu.ppy.sh/session"
 OSU_SEARCH_URL = "https://osu.ppy.sh/beatmapsets/search"
 
@@ -103,9 +104,21 @@ class Downloader:
         self.scrape_beatmapsets()
         self.remove_existing_beatmapsets()
 
+    def get_token(self):
+        # access the osu! homepage
+        homepage = self.session.get(OSU_URL)
+        # extract the CSRF token sitting in one of the <meta> tags
+        regex = re.compile(r".*?csrf-token.*?content=\"(.*?)\">", re.DOTALL)
+        match = regex.match(homepage.text)
+        csrf_token = match.group(1)
+        return csrf_token
+
     def login(self):
         logger.info(" DOWNLOADER STARTED ".center(50, "#"))
-        res = self.session.post(OSU_SESSION_URL, data=self.cred_helper.credentials)
+        data = self.cred_helper.credentials
+        data["_token"] = self.get_token()
+        headers = {"referer": OSU_URL}
+        res = self.session.post(OSU_SESSION_URL, data=data, headers=headers)
         if res.status_code != requests.codes.ok:
             logger.error("Login failed")
             sys.exit(1)

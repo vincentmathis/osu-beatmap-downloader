@@ -86,7 +86,7 @@ class BeatmapSet:
         self.set_id = data["id"]
         self.title = data["title"]
         self.artist = data["artist"]
-        self.download_url = f"https://osu.ppy.sh/beatmapsets/{self.set_id}/download"
+        self.url = f"https://osu.ppy.sh/beatmapsets/{self.set_id}"
 
     def __str__(self):
         string = f"{self.set_id} {self.artist} - {self.title}"
@@ -156,7 +156,8 @@ class Downloader:
 
     def download_beatmapset_file(self, beatmapset):
         logger.info(f"Downloading beatmapset: {beatmapset}")
-        response = self.session.get(beatmapset.download_url)
+        headers = {"referer": beatmapset.url}
+        response = self.session.get(beatmapset.url + "/download", headers=headers)
         if response.status_code == requests.codes.ok:
             logger.success(f"{response.status_code} - Download successful")
             self.write_beatmapset_file(str(beatmapset), response.content)

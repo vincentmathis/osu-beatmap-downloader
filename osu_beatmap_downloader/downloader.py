@@ -9,10 +9,20 @@ import requests
 from loguru import logger
 from PyInquirer import prompt
 
-HOME_DIR = os.path.join(os.getenv("USERPROFILE"), ".osu-beatmap-downloader")
+# Windows
+if sys.platform.startswith('win32'):
+    DOWNLOAD_PATH = os.path.join(os.getenv("LOCALAPPDATA"), "osu!", "Songs")
+    USERPROFILE = os.getenv("USERPROFILE")
+# Linux or MacOS
+else:
+    DOWNLOAD_PATH = os.path.join(os.curdir, 'osu-downloads')
+    if not os.path.exists(DOWNLOAD_PATH):
+        os.mkdir(DOWNLOAD_PATH)
+    USERPROFILE = os.getenv("HOME")
+
+HOME_DIR = os.path.join(USERPROFILE, ".osu-beatmap-downloader")
 CREDS_FILEPATH = os.path.join(HOME_DIR, "credentials.json")
 LOGS_FILEPATH = os.path.join(HOME_DIR, "downloader.log")
-OSU_BASE_PATH = os.path.join(os.getenv("LOCALAPPDATA"), "osu!", "Songs")
 ILLEGAL_CHARS = re.compile(r"[\<\>:\"\/\\\|\?*]")
 
 FORMAT_TIME = "<cyan>{time:YYYY-MM-DD HH:mm:ss}</cyan>"
@@ -146,7 +156,7 @@ class Downloader:
     def remove_existing_beatmapsets(self):
         filtered_set = set()
         for beatmapset in self.beatmapsets:
-            dir_path = os.path.join(OSU_BASE_PATH, str(beatmapset))
+            dir_path = os.path.join(DOWNLOAD_PATH, str(beatmapset))
             file_path = dir_path + ".osz"
             if os.path.isdir(dir_path) or os.path.isfile(file_path):
                 logger.info(f"Beatmapset already downloaded: {beatmapset}")
@@ -167,7 +177,7 @@ class Downloader:
             return False
 
     def write_beatmapset_file(self, filename, data):
-        file_path = f"{OSU_BASE_PATH}\\{filename}.osz"
+        file_path = os.path.join(DOWNLOAD_PATH, f"{filename}.osz")
         logger.info(f"Writing file: {file_path}")
         with open(file_path, "wb") as outfile:
             outfile.write(data)

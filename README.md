@@ -43,3 +43,9 @@ The programm will limit its rate to 30 files per minute to prevent unnecessary l
 Despite this after a specific amount of songs (that I don't know) the website will prevent any further downloads. The program will terminate after 5 failed downloads. In this case **you might have to wait for half an hour or even longer** before you can download again.
 
 Every step will be printed in your command line window and will also be logged in `%USERPROFILE%/.osu-beatmap-downloader/downloader.log` if you want to look at it later.
+
+## Linux/MacOS support
+
+If you're not on windows, the downloader doesn't know your osu! installation location and will download all songs in a folder `osu-downloads` which will be created in your current working directory.
+
+You will have to manually copy the song files to your osu! installation folder.

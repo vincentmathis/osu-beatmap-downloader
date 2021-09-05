@@ -10,12 +10,12 @@ from loguru import logger
 from PyInquirer import prompt
 
 # Windows
-if sys.platform.startswith('win32'):
+if sys.platform.startswith("win32"):
     DOWNLOAD_PATH = os.path.join(os.getenv("LOCALAPPDATA"), "osu!", "Songs")
     USERPROFILE = os.getenv("USERPROFILE")
 # Linux or MacOS
 else:
-    DOWNLOAD_PATH = os.path.join(os.curdir, 'osu-downloads')
+    DOWNLOAD_PATH = os.path.join(os.curdir, "osu-downloads")
     if not os.path.exists(DOWNLOAD_PATH):
         os.mkdir(DOWNLOAD_PATH)
     USERPROFILE = os.getenv("HOME")
@@ -104,9 +104,10 @@ class BeatmapSet:
 
 
 class Downloader:
-    def __init__(self, limit):
+    def __init__(self, limit, no_video):
         self.beatmapsets = set()
         self.limit = limit
+        self.no_video = no_video
         self.cred_helper = CredentialHelper()
         self.cred_helper.load_credentials()
         self.session = requests.Session()
@@ -167,7 +168,10 @@ class Downloader:
     def download_beatmapset_file(self, beatmapset):
         logger.info(f"Downloading beatmapset: {beatmapset}")
         headers = {"referer": beatmapset.url}
-        response = self.session.get(beatmapset.url + "/download", headers=headers)
+        download_url = beatmapset.url + "/download"
+        if self.no_video:
+            download_url += "?noVideo=1"
+        response = self.session.get(download_url, headers=headers)
         if response.status_code == requests.codes.ok:
             logger.success(f"{response.status_code} - Download successful")
             self.write_beatmapset_file(str(beatmapset), response.content)
@@ -205,25 +209,52 @@ class Downloader:
 
 def main():
     parser = argparse.ArgumentParser("osu-beatmap-downloader")
-    group = parser.add_mutually_exclusive_group()
-    group.add_argument(
+    subparsers = parser.add_subparsers(dest="command", help="Choose a subcommand")
+
+    parser_downloader = subparsers.add_parser(
+        "download", help="Start the beatmap downloader",
+    )
+    parser_downloader.add_argument(
         "-l",
         "--limit",
         type=int,
         help="Maximum number of beatmapsets to download",
         default=200,
     )
-    group.add_argument("--delete-creds", action="store_true")
+    parser_downloader.add_argument(
+        "-nv",
+        "--no-video",
+        help="Downloads beatmaps without video files",
+        action="store_true",
+    )
+
+    parser_credentials = subparsers.add_parser(
+        "credentials", help="Manage your login credentials"
+    )
+    mutex_group = parser_credentials.add_mutually_exclusive_group(required=True)
+    mutex_group.add_argument(
+        "--check", help="Check if the credential file exists", action="store_true"
+    )
+    mutex_group.add_argument(
+        "--delete", help="Delete the credential file if it exists", action="store_true"
+    )
+
     args = parser.parse_args()
-    if args.delete_creds:
-        try:
-            os.remove(CREDS_FILEPATH)
-            print("Credential file successfully deleted")
-        except FileNotFoundError:
-            print("There is no credential file to delete")
-    else:
-        loader = Downloader(args.limit)
+    if args.command == "download":
+        loader = Downloader(args.limit, args.no_video)
         loader.run()
+    elif args.command == "credentials":
+        if args.check:
+            if os.path.exists(CREDS_FILEPATH):
+                print("Credential file exists: ", CREDS_FILEPATH)
+            else:
+                print("There is no credential file")
+        if args.delete:
+            try:
+                os.remove(CREDS_FILEPATH)
+                print("Credential file successfully deleted")
+            except FileNotFoundError:
+                print("There is no credential file to delete")
 
 
 if __name__ == "__main__":

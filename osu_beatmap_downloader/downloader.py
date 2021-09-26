@@ -4,6 +4,9 @@ import os
 import re
 import sys
 import time
+import win32api 
+import win32con
+from getpass import getuser
 
 import httpx
 from loguru import logger
@@ -11,7 +14,33 @@ from PyInquirer import prompt
 
 # Windows
 if sys.platform.startswith("win32"):
-    DOWNLOAD_PATH = os.path.join(os.getenv("LOCALAPPDATA"), "osu!", "Songs")
+    key = win32api.RegOpenKey(win32con.HKEY_CLASSES_ROOT,
+    'osu\\DefaultIcon',0, win32con.KEY_ALL_ACCESS) 
+    osu = win32api.RegQueryValue(key,'')
+    osu = str(osu).split("\"")[1].split("\\")
+    del osu[-1]
+    dir = ''
+    for i in osu:
+        dir = dir + i + '\\'
+
+    config = dir + 'osu!.' + getuser() + '.cfg'
+
+    with open(config, encoding='utf-8', errors='ignore') as f:
+        a = f.readlines()
+
+    n = 0
+    for i in a:
+        if 'BeatmapDirectory' in i:
+            break
+        else:
+            n += 1
+    a = a[n].replace("\n", "").split(' = ')
+
+    if ':\\' not in a[1]:
+        dir = dir + a[1]
+    else:
+        dir = a[1]
+    DOWNLOAD_PATH = dir
     USERPROFILE = os.getenv("USERPROFILE")
 # Linux or MacOS
 else:

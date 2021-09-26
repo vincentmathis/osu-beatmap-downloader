@@ -5,7 +5,7 @@ import re
 import sys
 import time
 
-import requests
+import httpx
 from loguru import logger
 from PyInquirer import prompt
 
@@ -104,13 +104,22 @@ class BeatmapSet:
 
 
 class Downloader:
-    def __init__(self, limit, no_video):
+    def __init__(self, limit, no_video, proxy):
         self.beatmapsets = set()
         self.limit = limit
         self.no_video = no_video
+        self.proxy = proxy
         self.cred_helper = CredentialHelper()
         self.cred_helper.load_credentials()
-        self.session = requests.Session()
+        proxies = {
+            'http://': proxy,  # http://localhost:8080
+            'https://': proxy
+            }
+        if proxy != None:
+            logger.info(f'Set proxy: {proxy}')
+            self.session = httpx.Client(proxies=proxies)
+        else:
+            self.session = httpx.Client()
         self.login()
         self.scrape_beatmapsets()
         self.remove_existing_beatmapsets()
@@ -129,8 +138,8 @@ class Downloader:
         data = self.cred_helper.credentials
         data["_token"] = self.get_token()
         headers = {"referer": OSU_URL}
-        res = self.session.post(OSU_SESSION_URL, data=data, headers=headers)
-        if res.status_code != requests.codes.ok:
+        res = self.session.post(OSU_SESSION_URL, data=data, headers=headers, timeout=60.0)
+        if res.status_code != httpx.codes.OK:
             logger.error("Login failed")
             sys.exit(1)
         logger.success("Login succesfull")
@@ -171,8 +180,8 @@ class Downloader:
         download_url = beatmapset.url + "/download"
         if self.no_video:
             download_url += "?noVideo=1"
-        response = self.session.get(download_url, headers=headers)
-        if response.status_code == requests.codes.ok:
+        response = self.session.get(download_url, headers=headers, timeout=60.0)
+        if response.status_code == httpx.codes.OK:
             logger.success(f"{response.status_code} - Download successful")
             self.write_beatmapset_file(str(beatmapset), response.content)
             return True
@@ -227,6 +236,13 @@ def main():
         help="Downloads beatmaps without video files",
         action="store_true",
     )
+    parser_downloader.add_argument(
+        "-p",
+        "--proxy",
+        type=str,
+        help="Set download proxy",
+        default=None,
+    )
 
     parser_credentials = subparsers.add_parser(
         "credentials", help="Manage your login credentials"
@@ -241,7 +257,7 @@ def main():
 
     args = parser.parse_args()
     if args.command == "download":
-        loader = Downloader(args.limit, args.no_video)
+        loader = Downloader(args.limit, args.no_video, args.proxy)
         loader.run()
     elif args.command == "credentials":
         if args.check:

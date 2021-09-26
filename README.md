@@ -52,6 +52,15 @@ or
 osu-beatmap-downloader download -l 500 -nv
 ```
 
+And we support proxy(http only), usage:
+```
+osu-beatmap-downloader download --proxy http://locathost:8080
+```
+or
+```
+osu-beatmap-downloader download -p http://locathost:8080
+```
+
 The programm will limit its rate to 30 files per minute to prevent unnecessary load on osu!s website.
 Despite this after a specific amount of songs (that I don't know) the website will prevent any further downloads. The program will terminate after 5 failed downloads. In this case **you might have to wait for half an hour or even longer** before you can download again.
 

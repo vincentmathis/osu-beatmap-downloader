@@ -19,13 +19,19 @@ These directories might not be in PATH. If you want to use this program from the
 
 ## Usage
 
-To start the downloader use:
+To use the downloader navigate to your osu! Songs directory (default is `C:\<User>\AppData\Local\osu!\Songs\`):
+```
+cd ~\AppData\Local\osu!\Songs\
+```
+**Make sure you are in the correct directory** since the downloader will save all the files in the current working directory.
+
+Then start the dowloader with
 ```
 osu-beatmap-downloader download
 ```
 The program will ask for your osu! username and password because [osu.ppy.sh](https://osu.ppy.sh/beatmapsets) won't let you download beatmaps without being logged in.
 
-The program will then ask you if you want to save your credentials so that you don't have to enter them every time you want to start the program. They will be stored in `%USERPROFILE%/.osu-beatmap-downloader/credentials.json` on Windows. The credentials are saved in **plaintext** (yes, that includes your password!). If you want to delete the credential file you can run:
+The program will then ask you if you want to save your credentials so that you don't have to enter them every time you want to start the program. They will be stored in `%USERPROFILE%/.osu-beatmap-downloader/credentials.json` on Windows and `~/.osu-beatmap-downloader/credentials.json` on Linux/macOS. The credentials are saved in **plaintext** (yes, that includes your password!). If you want to delete the credential file you can run:
 ```
 osu-beatmap-downloader credentials --delete
 ```
@@ -55,12 +61,4 @@ osu-beatmap-downloader download -l 500 -nv
 The programm will limit its rate to 30 files per minute to prevent unnecessary load on osu!s website.
 Despite this after a specific amount of songs (that I don't know) the website will prevent any further downloads. The program will terminate after 5 failed downloads. In this case **you might have to wait for half an hour or even longer** before you can download again.
 
-Every step will be printed in your command line window and will also be logged in `%USERPROFILE%/.osu-beatmap-downloader/downloader.log` if you want to look at it later.
-
-## Linux/MacOS support
-
-If you're not on windows, the downloader doesn't know your osu! installation location and will download all songs in a folder `osu-downloads` which will be created in your current working directory.
-
-You will have to manually copy the song files to your osu! installation folder.
-
-The credential file will be placed in `~/.osu-beatmap-downloader/credentials.json`.
+Every step will be printed in your command line window and will also be logged in `%USERPROFILE%/.osu-beatmap-downloader/downloader.log` on Windows or `~/.osu-beatmap-downloader/downloader.log` on Linux/macOS.

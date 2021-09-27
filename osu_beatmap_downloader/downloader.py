@@ -9,17 +9,14 @@ import requests
 from loguru import logger
 from PyInquirer import prompt
 
+
+DOWNLOAD_PATH = os.curdir
 # Windows
 if sys.platform.startswith("win32"):
-    DOWNLOAD_PATH = os.path.join(os.getenv("LOCALAPPDATA"), "osu!", "Songs")
     USERPROFILE = os.getenv("USERPROFILE")
 # Linux or MacOS
 else:
-    DOWNLOAD_PATH = os.path.join(os.curdir, "osu-downloads")
-    if not os.path.exists(DOWNLOAD_PATH):
-        os.mkdir(DOWNLOAD_PATH)
     USERPROFILE = os.getenv("HOME")
-
 HOME_DIR = os.path.join(USERPROFILE, ".osu-beatmap-downloader")
 CREDS_FILEPATH = os.path.join(HOME_DIR, "credentials.json")
 LOGS_FILEPATH = os.path.join(HOME_DIR, "downloader.log")
@@ -212,7 +209,7 @@ def main():
     subparsers = parser.add_subparsers(dest="command", help="Choose a subcommand")
 
     parser_downloader = subparsers.add_parser(
-        "download", help="Start the beatmap downloader",
+        "download", help="Start the beatmap downloader in the current directory",
     )
     parser_downloader.add_argument(
         "-l",

@@ -1,8 +1,6 @@
 [tool.poetry]
 name = "osu-beatmap-downloader"
-version = "0.1.5"
-description = "Downloads x most favorized beatmapsets into your osu! song directory"
-authors = ["Vincent Mathis <vincemathis94@gmail.com>"]
+authors = ["Vincent Mathis <vincentmathis@protonmail.com>"]
 license = "GPL-3.0"
 readme = "README.md"
 repository = "https://github.com/vincentmathis/osu-beatmap-downloader"

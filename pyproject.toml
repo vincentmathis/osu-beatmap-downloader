@@ -10,7 +10,7 @@ keywords = ["osu!",
             "downloader"]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.9"
 requests = "^2.23.0"
 PyInquirer = "^1.0.3"
 loguru = "^0.4.1"

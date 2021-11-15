@@ -1,6 +1,6 @@
 # Osu! Beatmapset Downloader
 
-Downloads given number of beatmapsets with the most favorites from [osu.ppy.sh](https://osu.ppy.sh/beatmapsets) into the default osu! directory.
+Downloads given number of beatmapsets with the most favorites from [osu.ppy.sh](https://osu.ppy.sh/beatmapsets) into the current working directory.
 
 ## Installation
 

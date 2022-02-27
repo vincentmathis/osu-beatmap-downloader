@@ -8,7 +8,7 @@ import time
 
 import requests
 from loguru import logger
-from PyInquirer import prompt
+from InquirerPy import prompt
 
 
 DOWNLOAD_PATH = os.curdir

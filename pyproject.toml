@@ -14,8 +14,8 @@ keywords = ["osu!",
 [tool.poetry.dependencies]
 python = "^3.10"
 requests = "^2.23.0"
-PyInquirer = {git = "https://github.com/CITGuru/PyInquirer.git"}
 loguru = "^0.4.1"
+inquirerpy = "^0.3.3"
 
 [tool.poetry.dev-dependencies]
 black = "^19.10b0"

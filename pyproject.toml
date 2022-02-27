@@ -12,9 +12,9 @@ keywords = ["osu!",
             "downloader"]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.10"
 requests = "^2.23.0"
-PyInquirer = "^1.0.3"
+PyInquirer = {git = "https://github.com/CITGuru/PyInquirer.git"}
 loguru = "^0.4.1"
 
 [tool.poetry.dev-dependencies]

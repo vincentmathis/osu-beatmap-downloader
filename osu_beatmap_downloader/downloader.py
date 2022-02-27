@@ -1,4 +1,5 @@
 import argparse
+import base64
 import json
 import os
 import re
@@ -137,10 +138,10 @@ class Downloader:
         num_beatmapsets = 0
         logger.info("Scraping beatmapsets")
         while num_beatmapsets < self.limit:
+            cursor_string_json = json.dumps({"favourite_count": fav_count,"id": 0})
             params = {
                 "sort": "favourites_desc",
-                "cursor[favourite_count]": fav_count,
-                "cursor[_id]": 0,
+                "cursor_string": base64.b64encode(cursor_string_json.encode())
             }
             response = self.session.get(OSU_SEARCH_URL, params=params)
             data = response.json()

@@ -12,7 +12,7 @@ keywords = ["osu!",
             "downloader"]
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "~3.10"
 requests = "^2.23.0"
 loguru = "^0.4.1"
 inquirerpy = "^0.3.3"
@@ -31,5 +31,5 @@ osu-beatmap-downloader = "osu_beatmap_downloader:main"
 issues = "https://github.com/vincentmathis/osu-beatmap-downloader/issues"
 
 [build-system]
-requires = ["poetry>=0.12"]
-build-backend = "poetry.masonry.api"
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
